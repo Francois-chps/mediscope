@@ -27,5 +27,3 @@ MediScope:
 
 > ⚠️ **Disclaimer**: MediScope is not a medical device and does not replace
 > advice from a doctor or pharmacist.
-
-

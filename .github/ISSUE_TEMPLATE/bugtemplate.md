@@ -21,4 +21,3 @@ TODO: specify commit hash & version packages (pip freeze) if relevant
 ## Additional Info
 
 /label ~"Type::Bug"
-
