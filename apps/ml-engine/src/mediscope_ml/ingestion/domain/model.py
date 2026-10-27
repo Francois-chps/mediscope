@@ -136,3 +136,15 @@ class Smpc:
             for section in self.sections
             if section.code.is_ingested and section.text.strip()
         ]
+
+
+@dataclass(frozen=True, slots=True)
+class EmbeddedChunk:
+    """A chunk paired with its embedding vector, ready to be stored."""
+
+    chunk: Chunk
+    vector: tuple[float, ...]
+
+    def __post_init__(self) -> None:
+        if not self.vector:
+            raise DomainError(f"Chunk {self.chunk.key} has an empty embedding")

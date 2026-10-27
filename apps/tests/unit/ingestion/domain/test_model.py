@@ -5,6 +5,8 @@ import pytest
 from mediscope_ml.ingestion.domain.model import (
     CisCode,
     DataSnapshot,
+    DomainError,
+    EmbeddedChunk,
     InvalidCisCodeError,
     InvalidSmpcError,
     SectionCode,
@@ -102,3 +104,11 @@ class TestSmpc:
         (chunk,) = an_smpc(a_section(SectionCode.POSOLOGY)).to_chunks(SNAPSHOT)
 
         assert chunk.key == "61266250:4.2"
+
+
+class TestEmbeddedChunk:
+    def test_rejects_empty_vector(self) -> None:
+        (chunk,) = an_smpc(a_section(SectionCode.POSOLOGY)).to_chunks(SNAPSHOT)
+
+        with pytest.raises(DomainError):
+            EmbeddedChunk(chunk=chunk, vector=())
