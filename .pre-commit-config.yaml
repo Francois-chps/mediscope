@@ -36,7 +36,7 @@ repos:
       - id: mypy
         files: ^apps/ml-engine/
         args: [--config-file=apps/ml-engine/pyproject.toml]
-        additional_dependencies: [types-requests]
+        additional_dependencies: [types-requests, pytest]
 
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.2.0
