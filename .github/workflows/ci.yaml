@@ -54,3 +54,17 @@ jobs:
 
       - name: Run unit tests
         run: uv run --no-sync pytest tests/unit
+      - run: uv run --no-sync lint-imports
+
+  integration:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ml-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run --no-sync pytest tests/integration
