@@ -1,3 +1,4 @@
+exclude: ^apps/ml-engine/tests/fixtures/
 default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
 
