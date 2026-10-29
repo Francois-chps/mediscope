@@ -55,6 +55,10 @@ def split_sections(html: str) -> dict[SectionCode, str]:
     An anchor whose text does not start with its section number is misplaced and ignored.
     """
     anchors = list(_MAIN_ANCHOR.finditer(html))
+    if not anchors:
+        return {}
+    ends = [anchor.start() for anchor in anchors[1:]] + [len(html)]
+
     ends = [anchor.start() for anchor in anchors[1:]] + [len(html)]
     sections: dict[SectionCode, str] = {}
     for anchor, end in zip(anchors, ends, strict=True):
