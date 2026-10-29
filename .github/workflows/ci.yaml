@@ -54,6 +54,8 @@ jobs:
 
       - name: Run unit tests
         run: uv run --no-sync pytest tests/unit
+      - run: uv run --no-sync lint-imports
+
   integration:
     runs-on: ubuntu-latest
     defaults:

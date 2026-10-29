@@ -17,8 +17,28 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "import-linter>=2.15",
     "pytest>=9.1.1",
 ]
 [tool.mypy]
 strict = true
 mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
+
+[tool.importlinter]
+root_package = "mediscope_ml"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Hexagonal layers"
+type = "layers"
+layers = [
+    "mediscope_ml.ingestion.adapters",
+    "mediscope_ml.ingestion.application",
+    "mediscope_ml.ingestion.domain",
+]
+
+[[tool.importlinter.contracts]]
+name = "Domain and application stay free of third-party libraries"
+type = "forbidden"
+source_modules = ["mediscope_ml.ingestion.domain", "mediscope_ml.ingestion.application"]
+forbidden_modules = ["selectolax"]
