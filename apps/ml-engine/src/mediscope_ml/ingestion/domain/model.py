@@ -7,6 +7,8 @@ import re
 from dataclasses import dataclass
 from datetime import date
 from enum import StrEnum
+from mediscope_ml.ingestion.domain.chunking import split_text
+
 
 _CIS_PATTERN = re.compile(r"\d{8}")
 
@@ -21,6 +23,10 @@ class InvalidCisCodeError(DomainError):
 
 class InvalidSmpcError(DomainError):
     """Raised when an SmPC breaks one of its invariants."""
+
+
+class InvalidChunkingPolicyError(DomainError):
+    """Raised when chunk size or overlap are inconsistent."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,19 +92,41 @@ class DataSnapshot:
 
 
 @dataclass(frozen=True, slots=True)
+class ChunkingPolicy:
+    """How sections are split before embedding. Sizes are in characters.
+
+    Defaults fit 512-token embedding models (~4 characters per token in French).
+    """
+
+    max_chars: int = 1500
+    overlap_chars: int = 150
+
+    def __post_init__(self) -> None:
+        if self.max_chars <= 0 or not 0 <= self.overlap_chars < self.max_chars:
+            raise InvalidChunkingPolicyError(
+                "Expected 0 <= overlap < max and max > 0, "
+                f"got max={self.max_chars}, overlap={self.overlap_chars}"
+            )
+
+
+DEFAULT_CHUNKING = ChunkingPolicy()
+
+
+@dataclass(frozen=True, slots=True)
 class Chunk:
     """Unit of text to embed, traceable to its specialty, section and dates."""
 
     cis_code: CisCode
     section_code: SectionCode
+    index: int
     text: str
     smpc_revised_on: date
     snapshot: DataSnapshot
 
     @property
     def key(self) -> str:
-        """Stable identifier: re-ingesting the same section overwrites it."""
-        return f"{self.cis_code}:{self.section_code}"
+        """Stable identifier: re-ingesting the same chunk overwrites it."""
+        return f"{self.cis_code}:{self.section_code}:{self.index}"
 
 
 @dataclass(frozen=True, slots=True, eq=False)
@@ -123,18 +151,26 @@ class Smpc:
     def __hash__(self) -> int:
         return hash(self.cis_code)
 
-    def to_chunks(self, snapshot: DataSnapshot) -> list[Chunk]:
-        """One chunk per non-empty section within the v1 scope."""
+    def to_chunks(
+        self,
+        snapshot: DataSnapshot,
+        policy: ChunkingPolicy = DEFAULT_CHUNKING,
+    ) -> list[Chunk]:
+        """Chunks of every in-scope section; long sections become overlapping windows."""
         return [
             Chunk(
                 cis_code=self.cis_code,
                 section_code=section.code,
-                text=section.text.strip(),
+                index=index,
+                text=piece,
                 smpc_revised_on=self.revised_on,
                 snapshot=snapshot,
             )
             for section in self.sections
-            if section.code.is_ingested and section.text.strip()
+            if section.code.is_ingested
+            for index, piece in enumerate(
+                split_text(section.text, policy.max_chars, policy.overlap_chars)
+            )
         ]
 
 

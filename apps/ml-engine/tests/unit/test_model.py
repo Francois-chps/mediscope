@@ -103,7 +103,7 @@ class TestSmpc:
     def test_chunk_key_is_stable(self) -> None:
         (chunk,) = an_smpc(a_section(SectionCode.POSOLOGY)).to_chunks(SNAPSHOT)
 
-        assert chunk.key == "61266250:4.2"
+        assert chunk.key == "61266250:4.2:0"
 
 
 class TestEmbeddedChunk:

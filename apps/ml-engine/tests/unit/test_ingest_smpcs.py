@@ -50,7 +50,7 @@ def test_stores_one_embedded_chunk_per_ingested_section() -> None:
         an_smpc("12345678", SectionCode.INTERACTIONS),
     )
 
-    assert sorted(store.chunks) == ["12345678:4.5", "61266250:4.2"]
+    assert sorted(store.chunks) == ["12345678:4.5:0", "61266250:4.2:0"]
 
 
 def test_reports_smpcs_read_and_chunks_stored() -> None:
@@ -65,7 +65,7 @@ def test_reports_smpcs_read_and_chunks_stored() -> None:
 def test_chunks_carry_the_source_snapshot() -> None:
     _, store = ingest(an_smpc("61266250", SectionCode.POSOLOGY))
 
-    assert store.chunks["61266250:4.2"].chunk.snapshot == SNAPSHOT
+    assert store.chunks["61266250:4.2:0"].chunk.snapshot == SNAPSHOT
 
 
 def test_reingesting_does_not_duplicate_chunks() -> None:
